@@ -19,6 +19,10 @@ Open **http://localhost:9200**
 
 No dependencies, no build step, no network. Node ≥ 22 is the only requirement.
 
+### Vercel demo
+
+The repository includes a Vercel configuration for an online demo. Its API runs in Vercel Functions, so match state is held in a function instance's memory and can reset when the instance restarts or traffic reaches another instance. Use the local Node server for a shared, continuous multiplayer match until durable state storage is added.
+
 ---
 
 ## The table

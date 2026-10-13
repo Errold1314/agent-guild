@@ -30,7 +30,11 @@ const MIME = {
 };
 
 /** LAN addresses, so a host can hand out a link that works on other devices. */
-function lanUrls() {
+function lanUrls(req) {
+  if (req?.headers['x-forwarded-host']) {
+    const protocol = req.headers['x-forwarded-proto'] || 'https';
+    return [`${protocol}://${req.headers['x-forwarded-host']}`];
+  }
   const out = [];
   for (const list of Object.values(os.networkInterfaces())) {
     for (const ni of list || []) {
@@ -116,10 +120,15 @@ eventLog.subscribe((evt) => {
   }
 });
 
-const server = http.createServer(async (req, res) => {
+async function handleRequest(req, res) {
   const url = new URL(req.url, `http://localhost:${PORT}`);
 
   if (url.pathname === '/api/events') {
+    if (url.searchParams.has('since')) {
+      const since = Number(url.searchParams.get('since')) || 0;
+      const events = eventLog.all();
+      return json(res, 200, { events: eventLog.since(since), lastSeq: events.at(-1)?.seq || 0, room: ROOM });
+    }
     res.writeHead(200, {
       'Content-Type': 'text/event-stream; charset=utf-8',
       'Cache-Control': 'no-cache',
@@ -147,13 +156,13 @@ const server = http.createServer(async (req, res) => {
   if (url.pathname === '/api/state' && req.method === 'GET') return json(res, 200, publicState());
 
   if (url.pathname === '/api/room' && req.method === 'GET') {
-    return json(res, 200, { room: ROOM, port: PORT, urls: lanUrls(), seats: game.getState().seats });
+    return json(res, 200, { room: ROOM, port: PORT, urls: lanUrls(req), seats: game.getState().seats });
   }
 
   if (url.pathname === '/api/agents' && req.method === 'GET') {
     const s = game.getState();
     const cards = Object.values(s.cards).map((c) =>
-      a2a.agentCard({ id: c.id, name: c.name, role: c.role, skills: c.skills, endpoint: `http://localhost:${PORT}/a2a/${c.id}` })
+      a2a.agentCard({ id: c.id, name: c.name, role: c.role, skills: c.skills, endpoint: `${lanUrls(req)[0]}/a2a/${c.id}` })
     );
     return json(res, 200, cards);
   }
@@ -211,11 +220,13 @@ const server = http.createServer(async (req, res) => {
 
   if (req.method === 'GET') return serveStatic(req, res, url.pathname);
   return json(res, 404, { error: 'not found' });
-});
+}
 
 game.startMatch({ room: ROOM });
 
-server.listen(PORT, () => {
+if (require.main === module) {
+  const server = http.createServer(handleRequest);
+  server.listen(PORT, () => {
   const urls = lanUrls();
   console.log('');
   console.log('  ╔══════════════════════════════════════════════╗');
@@ -238,4 +249,7 @@ server.listen(PORT, () => {
   console.log('');
   console.log('  Ctrl+C to stop');
   console.log('');
-});
+  });
+}
+
+module.exports = handleRequest;

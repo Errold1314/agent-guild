@@ -64,6 +64,31 @@ function connectSSE() {
   es.onerror = () => console.warn('SSE dropped — the browser will reconnect');
 }
 
+let eventSeq = 0;
+let eventRoom = null;
+async function pollEvents() {
+  try {
+    const response = await fetch(`/api/events?since=${eventSeq}`, { cache: 'no-store' });
+    const data = await response.json();
+    if ((eventRoom && data.room !== eventRoom) || data.lastSeq < eventSeq) {
+      $('log').innerHTML = '';
+      eventSeq = 0;
+      await fetchState();
+    }
+    eventRoom = data.room;
+    for (const event of data.events) {
+      if (event.seq <= eventSeq) continue;
+      appendEvent(event);
+      eventSeq = event.seq;
+    }
+    if (data.events.length) scheduleRefetch();
+  } catch (err) {
+    console.warn('Event polling failed', err);
+  } finally {
+    setTimeout(pollEvents, 1000);
+  }
+}
+
 // ── Helpers ───────────────────────────────────────────────
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const short = (a) => (a && a.length > 12 ? `${a.slice(0, 6)}…${a.slice(-4)}` : a || '');
@@ -777,7 +802,7 @@ try {
   console.error('Control binding failed', err);
 }
 watchWallet();
-connectSSE();
+pollEvents();
 
 (async () => {
   await fetchState();
