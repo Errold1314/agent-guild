@@ -1,0 +1,20 @@
+# Dependencies (the demo itself is zero-dependency; these appear if you scaffold
+# real bag agent workspaces inside this tree)
+node_modules/
+
+# Runtime state from real bag workspaces — NEVER commit these.
+# .studio/wallets/ holds the encrypted agent keystores, and .studio/.env.local
+# holds WALLET_PASSWORD and provider keys.
+.studio/
+.evidence/
+
+# Secrets
+.env
+.env.local
+*.pem
+*.key
+
+# OS noise
+.DS_Store
+Thumbs.db
+desktop.ini

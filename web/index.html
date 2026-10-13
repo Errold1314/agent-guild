@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Agent Guild — a card table where every card is a real agent</title>
+<link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="logo">◈</span>
+    <div class="brandtext">
+      <h1>AGENT GUILD</h1>
+      <p>Every card is a running agent. You write the rules — it does the trading.</p>
+    </div>
+  </div>
+
+  <div class="topbar-right">
+    <div class="room-chip" id="roomChip" title="Room code">ROOM ····</div>
+    <button class="btn ghost" id="btnInvite">Invite</button>
+    <button class="btn wallet" id="btnWallet">
+      <span class="wdot" id="wdot"></span><span id="walletLabel">Connect Wallet</span>
+    </button>
+    <button class="btn ghost" id="btnRules">Rules</button>
+  </div>
+</header>
+
+<main class="stage" id="stage">
+  <section class="table-zone">
+    <div class="felt-wrap">
+      <div class="felt">
+        <div class="seat seat-north" data-seat="2"></div>
+        <div class="seat seat-west" data-seat="1"></div>
+        <div class="seat seat-east" data-seat="3"></div>
+        <div class="seat seat-south" data-seat="0"></div>
+        <div class="board" id="board"></div>
+      </div>
+    </div>
+
+    <div class="tablebar">
+      <div class="phase-chip" id="phaseChip">Waiting to deal</div>
+      <button class="btn primary" id="btnRound">Deal round 1</button>
+      <button class="btn ghost" id="btnFault" title="Demo aid: make the next delivery wrong, to show the refund path">Arm a fault</button>
+      <button class="btn ghost" id="btnReset">New match</button>
+      <label class="speed">Speed <input type="range" id="speed" min="1" max="8" value="3" /></label>
+    </div>
+  </section>
+
+  <aside class="logpane" id="logpane">
+    <div class="loghead">
+      <span>Table log</span>
+      <span class="loghint">proposals · gate rulings · money</span>
+      <button class="collapse" id="btnLogToggle" title="Collapse">▸</button>
+    </div>
+    <div class="log" id="log"></div>
+  </aside>
+</main>
+
+<div class="overlay" id="overlay" hidden></div>
+<div class="toast" id="toast"></div>
+
+<script src="/app.js"></script>
+</body>
+</html>

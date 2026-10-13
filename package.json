@@ -1,0 +1,14 @@
+{
+  "name": "agent-guild",
+  "version": "0.1.0",
+  "private": true,
+  "description": "代理商会 — 把 Agent 间的真实商业活动变成可玩的卡牌对局。零依赖，node server/index.js 即可运行。",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "smoke": "node scripts/smoke.js"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
